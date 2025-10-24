@@ -1,5 +1,4 @@
 # imports needed for web scraping
-import pdb
 import requests as re
 from ReadDB import URLLoader
 from urllib3.exceptions import InsecureRequestWarning
@@ -63,7 +62,6 @@ if __name__ == '__main__':
     cleanTrainingSites, cleanTestSites = loader.getCleanURLs(numURLs = 100, split = 1.0)
 
     cleanSiteData = pool_get(cleanTrainingSites)
-    breakpoint()
 
     # phishing_data = create_structured_data(phishing_collection_list)
     # legitimate_data = create_structured_data(legitimate_collection_list)
