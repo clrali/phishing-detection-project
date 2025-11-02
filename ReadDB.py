@@ -13,8 +13,11 @@ class URLLoader:
     def __init__(self, phishingFile = 'phishtank-database/online-valid.json', cleanFile = 'alexaRank/top1M.csv', maxURLs = 100000):
         with open(phishingFile, 'r') as file:
             phishingData = json.load(file)
-        for entry in phishingData:
-            self.phishingURLs.append(entry['url'])
+        for ind, entry in enumerate(phishingData):
+            if ind < maxURLs:
+                self.phishingURLs.append(entry['url'])
+            else:
+                break
 
         with open(cleanFile) as file:
             cleanReader = csv.reader(file)
@@ -26,23 +29,15 @@ class URLLoader:
         # remove labels from clean URL list
         self.cleanURLs.pop(0)
 
-    # return tuple of two lists, one of length (split * numURLs), and another of length (split * (1-numURLs))
-    # will not have duplicates between the two lists, meant for training
-    def getCleanURLs(self, numURLs = 10000, split = 0.8):
+    # return list of clean urls
+    def getCleanURLs(self, numURLs = 10000):
         numURLs = min(len(self.cleanURLs), numURLs)
-        sampleList = random.sample(self.cleanURLs, numURLs)
-        firstList = sampleList[0:int(numURLs * split)]
-        secondList = sampleList[int(numURLs * split):len(sampleList)]
-        return (firstList, secondList)
+        return self.cleanURLs[0:numURLs - 1]
 
-    # return tuple of two lists, one of length (split * numURLs), and another of length (split * (1-numURLs))
-    # will not have duplicates between the two lists, meant for training
-    def getPhishingURLs(self, numURLs = 10000, split = 0.8):
+    # return list of phishing urls, will randomly sample the phishing urls
+    def getPhishingURLs(self, numURLs = 10000):
         numURLs = min(len(self.phishingURLs), numURLs)
-        sampleList = random.sample(self.phishingURLs, numURLs)
-        firstList = sampleList[0:int(numURLs * split)]
-        secondList = sampleList[int(numURLs * split):len(sampleList)]
-        return (firstList, secondList)
+        return random.sample(self.phishingURLs, numURLs)
 
     phishingURLs = []
     cleanURLs = []
