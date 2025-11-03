@@ -1,0 +1,27 @@
+name: Auto update
+
+on:
+  schedule:
+  - cron: "0 0 * * *"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Clone repository
+      uses: actions/checkout@v3
+      with:
+        ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+    - name: Update
+      run: |
+        git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        chmod +x download.sh
+        ./download.sh ${{ secrets.PH_API_KEY }} ${{ secrets.PH_LOGIN }}
+    - name: Push changes
+      if: env.GIT_PUSH != 'no'
+      uses: ad-m/github-push-action@master
+      with:
+        ssh: true
+        branch: ${{ github.ref }}
