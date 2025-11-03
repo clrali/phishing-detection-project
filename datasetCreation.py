@@ -18,19 +18,34 @@ from multiprocessing import Pool
 
 disable_warnings(InsecureRequestWarning)
 
+# function to scrape the content of the URL and convert to a structured form for each
+def create_structured_data(url_list):
+    data_list = []
+    for i in range(0, len(url_list)):
+        try:
+            response = re.get(url_list[i], verify=False, timeout=1)
+            if response.status_code == 200:
+                soup = BeautifulSoup(response.content, "html.parser")
+                vector = fe.create_vector(soup)
+                vector.append(str(url_list[i]))
+                data_list.append(vector)
+                print(i, "processed:", url_list[i])
+        except re.exceptions.RequestException as e:
+            continue
+    return data_list
+
 def getResponse(url):
     try:
         response = re.get(url, verify=False, timeout=1)
         if response.status_code == 200:
-            soup = BeautifulSoup(response.content, "lxml")
-            features = fe.create_vector(soup)
-            features.append(url)
+            soup = BeautifulSoup(response.content, "html.parser")
+            vector = fe.create_vector(soup)
+            vector.append(url)
             print("processed: ", url)
-            return features
-        else:
-            return None
-    except Exception as e:
-        return None
+            return vector
+    except re.exceptions.RequestException as e:
+        pass
+    return None
 
 def pool_get(urls):
     resp = []
@@ -41,17 +56,14 @@ def pool_get(urls):
                 resp.append(response)
     return resp
 if __name__ == '__main__':
-    numURLs = 50000
-    loader = URLLoader(maxURLs = numURLs)
-    start = time.time()
-    cleanTrainingSites = loader.getCleanURLs(numURLs = numURLs)
+
+    loader = URLLoader(maxURLs = 100)
+    cleanTrainingSites, cleanTestSites = loader.getCleanURLs(numURLs = 100, split = 1.0)
+
     cleanSiteData = pool_get(cleanTrainingSites)
 
-    #phishingSites = loader.getPhishingURLs(numURLs = numURLs)
-    #phishingSiteData = pool_get(phishingSites)
-    end = time.time()
-    print(end - start)
-
+    # phishing_data = create_structured_data(phishing_collection_list)
+    # legitimate_data = create_structured_data(legitimate_collection_list)
     columns = [
         'has_title',
         'has_input',
@@ -98,14 +110,14 @@ if __name__ == '__main__':
         'number_of_table',
         'URL'
     ]
-
-    #phishing_df = pd.DataFrame(data=phishingSiteData, columns=columns)
+    
+    # phishing_df = pd.DataFrame(data=phishing_data, columns=columns)
     legitimate_df = pd.DataFrame(data=cleanSiteData, columns=columns)
-
+    
     # labeling 0 for legitimate and 1 for phishing
     legitimate_df['label'] = 0
-    #phishing_df['label'] = 1
-
+    # phishing_df['label'] = 1
+    
     # save to csv
-    legitimate_df.to_csv("datasets/structured_legitimate_data.csv", mode='w', index=False, header=False)
-    #phishing_df.to_csv("datasets/structured_phishing_data.csv", mode='w', index=False, header=False)
+    legitimate_df.to_csv("datasets/structured_legitimate_data.csv", mode='a', index=False, header=False)
+    # phishing_df.to_csv("datasets/structured_phishing_data.csv", mode='a', index=False, header=False)
