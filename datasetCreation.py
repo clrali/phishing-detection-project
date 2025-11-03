@@ -17,6 +17,21 @@ from multiprocessing import Pool
 
 
 disable_warnings(InsecureRequestWarning)
+# function to scrape the content of the URL and convert to a structured form for each
+def create_structured_data(url_list):
+    data_list = []
+    for i in range(0, len(url_list)):
+        try:
+            response = re.get(url_list[i], verify=False, timeout=1)
+            if response.status_code == 200:
+                soup = BeautifulSoup(response.content, "html.parser")
+                vector = fe.create_vector(soup)
+                vector.append(str(url_list[i]))
+                data_list.append(vector)
+                print(i, "processed:", url_list[i])
+        except re.exceptions.RequestException as e:
+            continue
+    return data_list
 
 # function to scrape the content of the URL and convert to a structured form for each
 def create_structured_data(url_list):
