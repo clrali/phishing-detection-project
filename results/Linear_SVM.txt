@@ -1,0 +1,2 @@
+Linear_SVM score: 0.8642136584657812
+Linear_SVM training time: 27.967770099639893

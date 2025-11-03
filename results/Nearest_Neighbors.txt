@@ -1,0 +1,2 @@
+Nearest_Neighbors score: 0.9488351839756151
+Nearest_Neighbors training time: 0.047363996505737305

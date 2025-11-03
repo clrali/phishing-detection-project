@@ -1,0 +1,2 @@
+AdaBoost score: 0.8746643442920387
+AdaBoost training time: 1.2806947231292725

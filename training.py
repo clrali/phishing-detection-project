@@ -29,7 +29,7 @@ names = [
     "Nearest_Neighbors",
     "Linear_SVM",
     "RBF_SVM",
-    "Gaussian_Process",
+    # "Gaussian_Process",
     "Decision_Tree",
     "Random_Forest",
     "Neural_Net",
@@ -42,7 +42,7 @@ classifiers = [
     KNeighborsClassifier(3),
     SVC(kernel="linear", C=0.025, random_state=42),
     SVC(gamma=2, C=1, random_state=42),
-    GaussianProcessClassifier(1.0 * RBF(1.0), random_state=42),
+    # GaussianProcessClassifier(1.0 * RBF(1.0), random_state=42), too big, blows up ram stack
     DecisionTreeClassifier(max_depth=5, random_state=42),
     RandomForestClassifier(
         max_depth=5, n_estimators=10, max_features=1, random_state=42
