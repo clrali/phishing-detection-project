@@ -20,12 +20,14 @@ from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
 
-from datasetCreation import columns
-
 import pickle
+from os import listdir
+
+# default randomize RNG, can set a value if required for repeateable results
+# can use this or use kfold validation for training
+seed = None
 
 # taken from scikit learn site "comparing classifiers"
-
 names = [
     "Logistic_Regression",
     "Nearest_Neighbors",
@@ -66,56 +68,113 @@ totalDF = pd.concat([legitimateDF, phishingDF], axis = 0).sample(frac=1).drop_du
 
 
 # implement file based configs on what features we wish to train on
-
-features = columns
-commonFeatures = []
+columns = [
+    'has_title',
+    'has_input',
+    'has_button',
+    'has_image',
+    'has_submit',
+    'has_link',
+    'has_password',
+    'has_email_input',
+    'has_hidden_element',
+    'has_audio',
+    'has_video',
+    'number_of_inputs',
+    'number_of_buttons',
+    'number_of_images',
+    'number_of_option',
+    'number_of_list',
+    'number_of_th',
+    'number_of_tr',
+    'number_of_href',
+    'number_of_paragraph',
+    'number_of_script',
+    'length_of_title',
+    'has_h1',
+    'has_h2',
+    'has_h3',
+    'length_of_text',
+    'number_of_clickable_button',
+    'number_of_a',
+    'number_of_img',
+    'number_of_div',
+    'number_of_figure',
+    'has_footer',
+    'has_form',
+    'has_text_area',
+    'has_iframe',
+    'has_text_input',
+    'number_of_meta',
+    'has_nav',
+    'has_object',
+    'has_picture',
+    'number_of_sources',
+    'number_of_span',
+    'number_of_table',
+    'URL'
+]
+configs = []
 try:
-    with open("features.json", 'r') as featureFile:
-        config = json.load(featureFile)
-        for entry in config:
-            if entry in features:
-                commonFeatures.append(entry)
+    testFiles = listdir('./settings')
+    testFiles = [fileName for fileName in testFiles if '.json' in fileName]
+    for featureFile in testFiles:
+        with open("./settings/" + featureFile, 'r') as settings:
+            config = json.load(settings)
+            requestedFeatures = config['features']
+            requestedFeatures = [setting for setting in requestedFeatures if setting in columns]
+            # assume URL and label are there in settings
+            if 'URL' not in requestedFeatures:
+                requestedFeatures.append('URL')
+            if 'label' not in requestedFeatures:
+                requestedFeatures.append('label')
+            suffix = config['suffix']
+            configs.append((requestedFeatures,suffix))
 except Exception as e:
-    print("no config file found, using defaults")
-# use commonFeatures here to scrub dataset
-scrubbedX = totalDF[commonFeatures]
-# Dropping URL for now, examine ways to integrate this data for later
-X = totalDF.drop(['URL', 'label'], axis = 1)
-# accumulate answers to X in Y
-Y = totalDF['label']
+    print("no config or invalid file found, using defaults")
+    configs.clear()
+    configs.append((columns, "default"))
 
-# default randomize RNG, can set a value if required for repeateable results
-# can use this or use kfold validation for training
-seed = None
-xTrain, xTest, yTrain, yTest = train_test_split(X,Y, test_size = 0.3, random_state = seed)
-
-for modelName, clf in zip(names, classifiers):
-    startTime = time.time()
-    print("training classifier: " + modelName)
-    clf = make_pipeline(StandardScaler(), clf)
-    clf.fit(xTrain, yTrain)
-    endTime = time.time()
-    trainTime = endTime - startTime;
-    score = clf.score(xTest, yTest)
-    modelFilename = "models/" + modelName + ".pickle"
-    resultsFilename = "results/" + modelName + ".txt"
-    try:
-        with open(modelFilename, 'w+b') as modelFile:
-            pickle.dump(clf, modelFile)
-    except Exception as e:
-        with open(modelFilename, 'xb') as modelFile:
-            print(modelFilename + " doesn't exist, creating file")
-            pickle.dump(clf, modelFile)
-    try:
-        with open(resultsFilename, 'w+') as resultsFile:
-            resultsFile.write(f"{modelName} score: {score}\n")
-            resultsFile.write(f"{modelName} training time: {trainTime}")
-    except Exception as e:
-        with open(resultsFilename, 'x+') as resultsFile:
-            print(resultsFilename + " doesn't exist, creating file")
-            # calculate and add other metrics we would like to present here
-            resultsFile.write(f"{modelName} score: {score}\n")
-            resultsFile.write(f"{modelName} training time: {trainTime}")
+for commonFeatures, fileSuffix in configs:
+    # use commonFeatures here to scrub dataset
+    print('using common features:')
+    print(commonFeatures)
+    print("with suffix:  " + fileSuffix)
+    scrubbedX = totalDF[commonFeatures]
+    # Dropping URL for now, examine ways to integrate this data for later
+    X = totalDF.drop(['URL', 'label'], axis = 1)
+    # accumulate answers to X in Y
+    Y = totalDF['label']
+    
+    xTrain, xTest, yTrain, yTest = train_test_split(X,Y, test_size = 0.3, random_state = seed)
+    
+    for modelName, clf in zip(names, classifiers):
+        startTime = time.time()
+        print("training classifier: " + modelName)
+        clf = make_pipeline(StandardScaler(), clf)
+        clf.fit(xTrain, yTrain)
+        endTime = time.time()
+        trainTime = endTime - startTime;
+        score = clf.score(xTest, yTest)
+        modelFilename = "models/" + modelName + fileSuffix + ".pickle"
+        resultsFilename = "results/" + modelName + fileSuffix + ".txt"
+        try:
+            with open(modelFilename, 'w+b') as modelFile:
+                pickle.dump(clf, modelFile)
+        except Exception as e:
+            with open(modelFilename, 'xb') as modelFile:
+                print(modelFilename + " doesn't exist, creating file")
+                pickle.dump(clf, modelFile)
+        try:
+            with open(resultsFilename, 'w+') as resultsFile:
+                resultsFile.write(f"{modelName} score: {score}\n")
+                resultsFile.write(f"{modelName} training time: {trainTime}")
+        except Exception as e:
+            with open(resultsFilename, 'x+') as resultsFile:
+                print(resultsFilename + " doesn't exist, creating file")
+                # calculate and add other metrics we would like to present here
+                resultsFile.write(f"{modelName} score: {score}\n")
+                resultsFile.write(f"{modelName} training time: {trainTime}")
 
 # can implement KFold validation quickly if desired, increases runtime
 K = 5
