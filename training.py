@@ -18,6 +18,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.linear_model import LogisticRegression
 
 from datasetCreation import columns
 
@@ -26,6 +27,7 @@ import pickle
 # taken from scikit learn site "comparing classifiers"
 
 names = [
+    "Logistic_Regression",
     "Nearest_Neighbors",
     "Linear_SVM",
     "RBF_SVM",
@@ -39,6 +41,7 @@ names = [
 ]
 
 classifiers = [
+    LogisticRegression(),
     KNeighborsClassifier(3),
     SVC(kernel="linear", C=0.025, random_state=42),
     SVC(gamma=2, C=1, random_state=42),
@@ -67,7 +70,7 @@ totalDF = pd.concat([legitimateDF, phishingDF], axis = 0).sample(frac=1).drop_du
 features = columns
 commonFeatures = []
 try:
-    with open(features.json, 'r') as featureFile:
+    with open("features.json", 'r') as featureFile:
         config = json.load(featureFile)
         for entry in config:
             if entry in features:
@@ -105,17 +108,17 @@ for modelName, clf in zip(names, classifiers):
             pickle.dump(clf, modelFile)
     try:
         with open(resultsFilename, 'w+') as resultsFile:
-            resultsFile.write(modelName + " score: " + score + "\n")
-            resultsFile.write(modelName + " training time: " + trainTime)
-    except Exception as e:
-        with open(resultsFilename, 'w+') as resultsFile:
-            print(resultsFilename + " doesn't exist, creating file")
             resultsFile.write(f"{modelName} score: {score}\n")
             resultsFile.write(f"{modelName} training time: {trainTime}")
-        
+    except Exception as e:
+        with open(resultsFilename, 'x+') as resultsFile:
+            print(resultsFilename + " doesn't exist, creating file")
+            # calculate and add other metrics we would like to present here
+            resultsFile.write(f"{modelName} score: {score}\n")
+            resultsFile.write(f"{modelName} training time: {trainTime}")
 
 # can implement KFold validation quickly if desired, increases runtime
-K = 10
+K = 5
 kFoldValidationSets  = KFold(n_splits = K, shuffle = True, random_state = seed)
 
 results = {}
