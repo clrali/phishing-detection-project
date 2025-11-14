@@ -19,6 +19,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import confusion_matrix
 
 import pickle
 from os import listdir
@@ -155,9 +156,15 @@ for commonFeatures, fileSuffix in configs:
         clf.fit(xTrain, yTrain)
         endTime = time.time()
         trainTime = endTime - startTime;
-        score = clf.score(xTest, yTest)
+        answers = clf.predict(xTest)
+        # calculate total score of classifier
+        score = sum(answers == yTest) / answers.size
+        # extracting values we may find useful
+        clf_confusion_matrix = confusion_matrix(yTest, answers)
+        tn, fp, fn, tp = clf_confusion_matrix.ravel().tolist()
         modelFilename = "models/" + modelName + fileSuffix + ".pickle"
         resultsFilename = "results/" + modelName + fileSuffix + ".txt"
+        # save classifiers for later 
         try:
             with open(modelFilename, 'w+b') as modelFile:
                 pickle.dump(clf, modelFile)
@@ -165,15 +172,18 @@ for commonFeatures, fileSuffix in configs:
             with open(modelFilename, 'xb') as modelFile:
                 print(modelFilename + " doesn't exist, creating file")
                 pickle.dump(clf, modelFile)
+        # save score and metrics for later
         try:
             with open(resultsFilename, 'w+') as resultsFile:
                 resultsFile.write(f"{modelName} score: {score}\n")
+                resultsFile.write(f"{modelName} True Negative: {tn}, False Positive: {fp}, False Negative: {fn}, True Positive: {tp}\n")
                 resultsFile.write(f"{modelName} training time: {trainTime}")
         except Exception as e:
             with open(resultsFilename, 'x+') as resultsFile:
                 print(resultsFilename + " doesn't exist, creating file")
                 # calculate and add other metrics we would like to present here
                 resultsFile.write(f"{modelName} score: {score}\n")
+                resultsFile.write(f"{modelName} True Negative: {tn}, False Positive: {fp}, False Negative: {fn}, True Positive: {tp}\n")
                 resultsFile.write(f"{modelName} training time: {trainTime}")
 
 # can implement KFold validation quickly if desired, increases runtime
