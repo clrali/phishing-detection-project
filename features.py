@@ -1,4 +1,3 @@
-# my_features.py
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import List
@@ -122,7 +121,7 @@ class HTMLFeatures:
             text_len,
             num_click_buttons,
             num_a,
-            num_imgs_html,   # or separate if you like
+            num_imgs_html,
             num_div,
             num_figure,
             has_footer,
@@ -144,3 +143,4 @@ def extract_features_from_html(html: str) -> list[int | float]:
     """Convenience wrapper: HTML text -> feature vector."""
     soup = BeautifulSoup(html, "html.parser")
     return HTMLFeatures(soup).to_vector()
+
