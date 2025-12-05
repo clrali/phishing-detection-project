@@ -7,7 +7,7 @@ from urllib3 import disable_warnings
 # imports needed for creating the structured data
 from bs4 import BeautifulSoup
 import pandas as pd
-import getFeatures as getFeatures
+from features import extract_features_from_html
 
 # imports for multiprocessing requests
 import time
@@ -20,8 +20,7 @@ def getResponse(url):
     try:
         response = re.get(url, verify=False, timeout=1)
         if response.status_code == 200:
-            soup = BeautifulSoup(response.content, "html.parser")
-            vector = getFeatures.create_vector(soup)
+            vector = extract_features_from_html(response.content)
             vector.append(url)
             print("processed: ", url)
             return vector
