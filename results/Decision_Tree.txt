@@ -1,2 +1,0 @@
-Decision_Tree score: 0.9128383772407287
-Decision_Tree training time: 0.14425134658813477

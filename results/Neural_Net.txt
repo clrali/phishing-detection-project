@@ -1,2 +1,0 @@
-Neural_Net score: 0.8944771028376515
-Neural_Net training time: 9.441468238830566
