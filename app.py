@@ -57,7 +57,7 @@ def model_predict(model, features: list[float | int]):
     """Run the model on a single feature vector."""
     X = np.array(features, dtype=float).reshape(1, -1)
 
-    # Some models have predict_proba, some don't (e.g., LinearSVC)
+    # Some models have predict_proba, some don't
     if hasattr(model, "predict_proba"):
         proba = model.predict_proba(X)[0]
         label = int(np.argmax(proba))
@@ -120,7 +120,7 @@ either **legitimate (0)** or **phishing (1)**, based on content-based HTML featu
                 st.error("Could not fetch this URL (network error or non-200 status).")
                 return
 
-            # extract features using *your* feature extractor
+            # extract features using our feature extractor
             features = extract_features_from_html(html)
             model = load_trained_model()
             label, confidence = model_predict(model, features)
@@ -142,4 +142,5 @@ either **legitimate (0)** or **phishing (1)**, based on content-based HTML featu
 
 if __name__ == "__main__":
     main()
+
 
