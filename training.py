@@ -1,4 +1,3 @@
-# train_phishing_model.py
 import os
 import numpy as np
 import pandas as pd
@@ -81,7 +80,7 @@ def evaluate_models(X, y):
     best_model = None
 
     for name, model in models.items():
-        print(f"\n🔹 Training {name} ...")
+        print(f"\nTraining {name} ...")
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
 
@@ -118,7 +117,7 @@ def evaluate_models(X, y):
         by="accuracy", ascending=False
     ).reset_index(drop=True)
 
-    print("\n🏆 Best model:", best_model_name, f"(accuracy = {best_accuracy:.4f})")
+    print("\nBest model:", best_model_name, f"(accuracy = {best_accuracy:.4f})")
     return results_df, best_model, best_model_name
 
 
@@ -145,3 +144,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
