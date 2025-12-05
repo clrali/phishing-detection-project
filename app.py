@@ -14,9 +14,7 @@ from my_features import extract_features_from_html
 disable_warnings(InsecureRequestWarning)
 
 
-# -----------------------------
 # Cached helpers
-# -----------------------------
 @st.cache_resource
 def load_trained_model():
     """Load the best phishing detection model from disk."""
@@ -33,9 +31,7 @@ def load_metrics_table():
         return None
 
 
-# -----------------------------
 # Utility functions
-# -----------------------------
 def normalize_url(url: str) -> str:
     """Ensure the URL has a scheme (http/https)."""
     url = url.strip()
@@ -73,16 +69,14 @@ def model_predict(model, features: list[float | int]):
     return label, confidence
 
 
-# -----------------------------
 # Streamlit UI
-# -----------------------------
 def main():
-    st.set_page_config(page_title="Phishing URL Detector", page_icon="🛡️")
-    st.title("🛡️ Phishing Website Detection")
+    st.set_page_config(page_title="Phishing URL Detector")
+    st.title("Phishing Website Detection")
 
     st.markdown(
         """
-This tool uses a machine learning model that **you trained** to classify web pages as
+This tool uses a machine learning model that we trained to classify web pages as
 either **legitimate (0)** or **phishing (1)**, based on content-based HTML features
 (e.g., forms, inputs, images, scripts, structure, etc.).
         """
@@ -148,3 +142,4 @@ either **legitimate (0)** or **phishing (1)**, based on content-based HTML featu
 
 if __name__ == "__main__":
     main()
+
